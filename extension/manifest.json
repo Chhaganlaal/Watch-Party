@@ -1,0 +1,11 @@
+{
+  "name": "Watch Party",
+  "description": "This is a Chrome extension built with React and TypeScript",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "permissions": ["storage", "tabs", "activeTab"],
+  "action": {
+      "default_popup": "js/index.html",
+      "default_title": "Watch Party"
+  }
+}
