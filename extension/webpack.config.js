@@ -4,7 +4,9 @@ const CopyPlugin = require("copy-webpack-plugin")
 
 module.exports = {
   entry: {
-    index: "./src/index.tsx"
+    index: "./src/index.tsx",
+    watch_party_handler: "./src/handler/watch-party-handler.tsx",
+    content_script: "./src/content-script.ts"
   },
   mode: "production",
   module: {
