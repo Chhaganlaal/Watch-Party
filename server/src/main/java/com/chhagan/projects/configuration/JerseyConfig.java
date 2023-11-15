@@ -1,18 +1,18 @@
 package com.chhagan.projects.configuration;
 
 import org.glassfish.jersey.server.ResourceConfig;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
-import com.chhagan.projects.controller.WatchPartyController;
+import com.chhagan.projects.restcontroller.PartyController;
 
 import jakarta.ws.rs.ApplicationPath;
 
-@Component
-@ApplicationPath("/")
+@Configuration
+@ApplicationPath("/app")
 public class JerseyConfig extends ResourceConfig {
   
   public JerseyConfig() {
-    register(WatchPartyController.class);
+    register(PartyController.class);
   }
 
 }
