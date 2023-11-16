@@ -5,7 +5,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
-import com.chhagan.projects.websocket.WebSocketConnection;
+import com.chhagan.projects.websocket.PartyWebSocket;
 
 import jakarta.inject.Inject;
 
@@ -13,16 +13,16 @@ import jakarta.inject.Inject;
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
 
-  private final WebSocketConnection webSocketConnection;
+  private final PartyWebSocket partyWebSocket;
 
   @Inject
-  public WebSocketConfig(WebSocketConnection webSocketConnection) {
-    this.webSocketConnection = webSocketConnection;
+  public WebSocketConfig(PartyWebSocket webSocketConnection) {
+    this.partyWebSocket = webSocketConnection;
   }
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(webSocketConnection, "/broadcast").setAllowedOrigins("*");
+    registry.addHandler(partyWebSocket, "/broadcast").setAllowedOrigins("*");
   }
   
 }
