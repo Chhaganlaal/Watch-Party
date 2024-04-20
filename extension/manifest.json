@@ -3,7 +3,7 @@
   "description": "This is a Chrome extension built with React and TypeScript",
   "version": "1.0.0",
   "manifest_version": 3,
-  "permissions": ["storage", "tabs", "activeTab", "scripting"],
+  "permissions": ["storage", "tabs", "activeTab", "scripting", "declarativeContent"],
   "host_permissions": [
     "*://*/*"
   ],
@@ -11,11 +11,9 @@
       "default_popup": "js/index.html",
       "default_title": "Watch Party"
   },
-  "content_scripts": [{
-    "run_at": "document_end",
-    "matches": ["http://www.netflix.com/watch/*", "https://www.netflix.com/watch/*"],
-    "js": ["js/content_script.js"]
-  }],
+  "background": {
+    "service_worker": "js/service_worker.js"
+  },
   "web_accessible_resources": [{
     "resources": ["js/watch_party_handler.js"],
     "matches": ["<all_urls>"]

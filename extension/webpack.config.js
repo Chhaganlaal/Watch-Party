@@ -6,7 +6,8 @@ module.exports = {
   entry: {
     index: "./src/index.tsx",
     watch_party_handler: "./src/handlers/watch-party-handler.tsx",
-    content_script: "./src/content-script.ts"
+    content_script: "./src/content-script.ts",
+    service_worker: "./src/service-worker.ts"
   },
   mode: "production",
   module: {

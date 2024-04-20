@@ -3,6 +3,8 @@ import logo from './logo.svg';
 import './App.css';
 import Helmet from 'react-helmet';
 import Popup from './popup/popup';
+import DefaultView from './views/default-view';
+import SessionContextProvider from './contexts/session-context';
 
 function App() {
   return (
@@ -14,7 +16,9 @@ function App() {
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Paytone+One&display=swap" />
         <link rel="stylesheet" href="./App.css" />
       </Helmet>
-      <Popup />
+      <SessionContextProvider>
+        <Popup defaultView={ new DefaultView({}) }/>
+      </SessionContextProvider>
     </div>
   );
 }

@@ -8,11 +8,11 @@ import ReactDOM from "react-dom";
 //   }
 // }
 
-// declare global {
-//   interface Window {
-//     netflix: any;
-//   }
-// }
+declare global {
+  interface Window {
+    netflix: any;
+  }
+}
 
 // function fn() {
 //   console.log(window);
@@ -32,14 +32,15 @@ import ReactDOM from "react-dom";
 
 class WatchPartyHandler extends React.Component {
   render = (): React.ReactNode => {
+    console.log(window.netflix);
     return (
-      <h1>App was injected</h1>
+      <h1>App was injec</h1>
     )
   }
 }
 
 const container = document.createElement('div');
-container.setAttribute('id', 'app-wrapper');
+container.setAttribute('id', 'watch-party-handler-container');
 container.setAttribute('style', 'z-index: 10; position: relative;');
 document.body.appendChild(container);
 

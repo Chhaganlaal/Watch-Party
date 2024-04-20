@@ -13,24 +13,28 @@ interface CreateRoomViewState {
 
 class CreateRoomView extends React.Component<CreateRoomViewProps, CreateRoomViewState> {
 
-  buttonText: string;
-  canCreateParty: boolean;
+  // buttonText: string;
+  // canCreateParty: boolean;
 
   constructor(props: CreateRoomViewProps) {
     super(props);
 
-    this.buttonText = '',
-    this.canCreateParty = false
-  }
-
-  updateButtonText = (): void => {
     const currentTabUrl = new URL(this.props.currentTab.url ? this.props.currentTab.url : '');
-    if (currentTabUrl.pathname.includes('/browse')) {
-      this.buttonText = 'Play a video first',
-      this.canCreateParty = false
+    if (currentTabUrl.pathname.includes('/browse') || currentTabUrl.pathname.includes('/title')) {
+      this.state = {
+        buttonText: 'Play a video first',
+        canCreateParty: false
+      }
     } else if (currentTabUrl.pathname.includes('/watch')) {
-      this.buttonText = 'Start the party',
-      this.canCreateParty = true
+      this.state = {
+        buttonText: 'Start the party',
+        canCreateParty: true
+      }
+    } else {
+      this.state = {
+        buttonText: '',
+        canCreateParty: false
+      }
     }
   }
 
@@ -38,23 +42,26 @@ class CreateRoomView extends React.Component<CreateRoomViewProps, CreateRoomView
     const currentTab: chrome.tabs.Tab = this.props.currentTab;
     const url: URL = new URL(currentTab.url ? currentTab.url : '');
     url.searchParams.append('roomId', '123');
-    chrome.tabs.update(currentTab.id ? currentTab.id : chrome.tabs.TAB_ID_NONE, { url: url.toString() });
+    chrome.tabs.update(currentTab.id ? currentTab.id : chrome.tabs.TAB_ID_NONE, { url: url.toString() })
+      .then((updatedTab: chrome.tabs.Tab) => {
+        const shareRoomView: ShareRoomView = new ShareRoomView({
+          currentTab: updatedTab,
+          popupStateUpdater: (currentView: React.Component) => this.props.popupStateUpdater(currentView)
+        });
+        this.props.popupStateUpdater(shareRoomView);
 
-    const shareRoomView: ShareRoomView = new ShareRoomView({
-      currentTab: currentTab,
-      popupStateUpdater: (currentView: React.Component) => this.props.popupStateUpdater(currentView)
-    });
-    this.props.popupStateUpdater(shareRoomView);
+        chrome.runtime.sendMessage(currentTab);
+      }, (error) => {
+        console.error(error);
+      });
   }
 
   render = (): React.ReactNode => {
-    this.updateButtonText();
-
     return (
       <div>
         <h2>Watch Party</h2>
         <p>Create a party</p>
-        <button className="button" disabled={!this.canCreateParty} onClick={this.createRoom}>{this.buttonText}</button>
+        <button className="button" disabled={!this.state.canCreateParty} onClick={this.createRoom}>{this.state.buttonText}</button>
       </div>
     )
   }

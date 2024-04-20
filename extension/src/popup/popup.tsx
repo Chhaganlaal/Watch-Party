@@ -4,6 +4,7 @@ import CreateRoomView from "../views/create-room-view";
 import ShareRoomView from "../views/share-room-view";
 
 interface PopupProps {
+  defaultView: React.Component;
 }
 
 interface PopupState {
@@ -16,7 +17,7 @@ class Popup extends React.Component<PopupProps, PopupState> {
     super(props);
 
     this.state = {
-      currentView: new DefaultView({})
+      currentView: props.defaultView
     };
 
     this.setCurrentView();
