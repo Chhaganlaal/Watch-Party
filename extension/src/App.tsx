@@ -1,10 +1,8 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import Helmet from 'react-helmet';
 import Popup from './popup/popup';
 import DefaultView from './views/default-view';
-import SessionContextProvider from './contexts/session-context';
+import { SessionContextProvider } from './contexts/session-context';
 
 function App() {
   return (
@@ -17,7 +15,7 @@ function App() {
         <link rel="stylesheet" href="./App.css" />
       </Helmet>
       <SessionContextProvider>
-        <Popup defaultView={ new DefaultView({}) }/>
+        <Popup/>
       </SessionContextProvider>
     </div>
   );

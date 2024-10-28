@@ -1,9 +1,10 @@
 import React from "react";
 import CreateRoomView from "./create-room-view";
+import { ISessionContext, SessionContextConsumer } from "../contexts/session-context";
 
 interface ShareRoomViewProps {
   currentTab: chrome.tabs.Tab;
-  popupStateUpdater: (currentView: React.Component) => void;
+  popupViewUpdater: (sessionContext: ISessionContext) => void;
 }
 
 interface ShareRoomViewState {
@@ -15,27 +16,27 @@ class ShareRoomView extends React.Component<ShareRoomViewProps, ShareRoomViewSta
     super(props);
   }
 
-  leaveRoom = (): void => {
-    const currentTab: chrome.tabs.Tab = this.props.currentTab;
-    const url: URL = new URL(currentTab.url ? currentTab.url : '');
-    url.searchParams.delete('roomId');
-    chrome.tabs.update(currentTab.id ? currentTab.id : chrome.tabs.TAB_ID_NONE, { url: url.toString() });
-
-    const createRoomView: CreateRoomView = new CreateRoomView({
-      currentTab: currentTab,
-      popupStateUpdater: (currentView: React.Component) => this.props.popupStateUpdater(currentView)
-    });
-    this.props.popupStateUpdater(createRoomView)
+  leaveRoom = (sessionContext: ISessionContext): void => {
+		sessionContext.closeSession(() => {
+			this.props.popupViewUpdater(sessionContext)
+		});
   }
 
   render = (): React.ReactNode => {
     return (
-      <div>
+      <>
         <h2>Watch Party</h2>
         <p>Share the URL below so others can join the party</p>
         <p><i>URL to WatchParty</i></p>
-        <button className="button" onClick={this.leaveRoom}>Leave Party</button>
-      </div>
+        <SessionContextConsumer>
+          { (sessionContext: ISessionContext) => (
+            <button className="button"
+								onClick={ () => this.leaveRoom(sessionContext) }>
+              Leave Party {sessionContext.sessionId}
+            </button>
+          ) }
+        </SessionContextConsumer>
+      </>
     )
   }
 }

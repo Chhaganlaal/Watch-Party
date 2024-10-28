@@ -1,9 +1,10 @@
 import React from "react";
 import ShareRoomView from "./share-room-view";
+import { ISessionContext, SessionContextConsumer } from "../contexts/session-context";
 
 interface CreateRoomViewProps {
   currentTab: chrome.tabs.Tab;
-  popupStateUpdater: (currentView: React.Component) => void;
+  popupViewUpdater: (sessionContext: ISessionContext) => void;
 }
 
 interface CreateRoomViewState {
@@ -38,31 +39,29 @@ class CreateRoomView extends React.Component<CreateRoomViewProps, CreateRoomView
     }
   }
 
-  createRoom = (): void => {
-    const currentTab: chrome.tabs.Tab = this.props.currentTab;
-    const url: URL = new URL(currentTab.url ? currentTab.url : '');
-    url.searchParams.append('roomId', '123');
-    chrome.tabs.update(currentTab.id ? currentTab.id : chrome.tabs.TAB_ID_NONE, { url: url.toString() })
-      .then((updatedTab: chrome.tabs.Tab) => {
-        const shareRoomView: ShareRoomView = new ShareRoomView({
-          currentTab: updatedTab,
-          popupStateUpdater: (currentView: React.Component) => this.props.popupStateUpdater(currentView)
-        });
-        this.props.popupStateUpdater(shareRoomView);
+  createRoom = (sessionContext: ISessionContext): void => {
+    sessionContext.createSession(() => {
+      this.props.popupViewUpdater(sessionContext);
 
-        chrome.runtime.sendMessage(currentTab);
-      }, (error) => {
-        console.error(error);
-      });
+      chrome.runtime.sendMessage(this.props.currentTab);
+    });
   }
 
   render = (): React.ReactNode => {
     return (
-      <div>
+      <>
         <h2>Watch Party</h2>
         <p>Create a party</p>
-        <button className="button" disabled={!this.state.canCreateParty} onClick={this.createRoom}>{this.state.buttonText}</button>
-      </div>
+        <SessionContextConsumer>
+          { (sessionContext: ISessionContext) => (
+            <button className="button"
+                disabled={ !this.state.canCreateParty }
+                onClick={ () => this.createRoom(sessionContext) }>
+              { this.state.buttonText }
+            </button>
+          ) }
+        </SessionContextConsumer>
+      </>
     )
   }
 }

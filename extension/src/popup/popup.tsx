@@ -1,10 +1,10 @@
-import React, { useEffect } from "react";
-import DefaultView from "../views/default-view";
+import React from "react";
 import CreateRoomView from "../views/create-room-view";
 import ShareRoomView from "../views/share-room-view";
+import DefaultView from "../views/default-view";
+import { ISessionContext, SessionContextConsumer } from "../contexts/session-context";
 
 interface PopupProps {
-  defaultView: React.Component;
 }
 
 interface PopupState {
@@ -17,30 +17,28 @@ class Popup extends React.Component<PopupProps, PopupState> {
     super(props);
 
     this.state = {
-      currentView: props.defaultView
+      currentView: new DefaultView({})
     };
-
-    this.setCurrentView();
   }
 
-  setCurrentView = (): void => {
+  setCurrentView = (sessionContext: ISessionContext): void => {
     chrome.tabs.query({ active: true, currentWindow: true}, tabs => {
       const currentTab: chrome.tabs.Tab = tabs[0];
       const url: URL = new URL(currentTab.url ? currentTab.url : '');
 
       if (url.hostname === 'www.netflix.com') {
-        if (url.pathname.includes('watch') && url.searchParams.has('roomId')) {
+        if (url.pathname.includes('watch') && sessionContext.sessionId) {
           const shareRoomView: ShareRoomView = new ShareRoomView({
             currentTab: currentTab,
-            popupStateUpdater: (currentView: React.Component) => this.setState({currentView})
+            popupViewUpdater: (sessionContext: ISessionContext) => this.setCurrentView(sessionContext)
           });
-          this.setState({currentView: shareRoomView});
+          this.setState({ currentView: shareRoomView });
         } else {
           const createRoomView: CreateRoomView = new CreateRoomView({
             currentTab: currentTab,
-            popupStateUpdater: (currentView: React.Component) => this.setState({currentView})
+            popupViewUpdater: (sessionContext: ISessionContext) => this.setCurrentView(sessionContext)
           });
-          this.setState({currentView: createRoomView});
+          this.setState({ currentView: createRoomView });
         }
       }
     });
@@ -48,7 +46,14 @@ class Popup extends React.Component<PopupProps, PopupState> {
 
   render = (): React.ReactNode => {
     return (
-      this.state.currentView.render()
+      <>
+        <SessionContextConsumer>
+          { (sessionContext: ISessionContext) => (
+            <>{ this.setCurrentView(sessionContext) }</>
+          ) }
+        </SessionContextConsumer>
+        { this.state.currentView.render() }
+      </>
     );
   }
 }

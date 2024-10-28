@@ -36,4 +36,11 @@ public final class ContextService {
     return partyIdToPartyMap.get(partyId);
   }
 
+  public static Party getPartyBySession(WebSocketSession session) {
+    return partyIdToPartyMap.values().stream()
+        .filter(party -> party.getSessions().contains(session))
+        .findAny()
+        .orElse(null);
+  }
+
 }
