@@ -1,10 +1,9 @@
 import React from "react";
-import CreateRoomView from "./create-room-view";
 import { ISessionContext, SessionContextConsumer } from "../contexts/session-context";
 
 interface ShareRoomViewProps {
   currentTab: chrome.tabs.Tab;
-  popupViewUpdater: (sessionContext: ISessionContext) => void;
+  popupViewUpdater: (currentTab: chrome.tabs.Tab) => void;
 }
 
 interface ShareRoomViewState {
@@ -17,9 +16,7 @@ class ShareRoomView extends React.Component<ShareRoomViewProps, ShareRoomViewSta
   }
 
   leaveRoom = (sessionContext: ISessionContext): void => {
-		sessionContext.closeSession(() => {
-			this.props.popupViewUpdater(sessionContext)
-		});
+    sessionContext.closeSession();
   }
 
   render = (): React.ReactNode => {

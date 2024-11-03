@@ -1,10 +1,9 @@
 import React from "react";
-import ShareRoomView from "./share-room-view";
 import { ISessionContext, SessionContextConsumer } from "../contexts/session-context";
 
 interface CreateRoomViewProps {
   currentTab: chrome.tabs.Tab;
-  popupViewUpdater: (sessionContext: ISessionContext) => void;
+  popupViewUpdater: (currentTab: chrome.tabs.Tab) => void;
 }
 
 interface CreateRoomViewState {
@@ -13,9 +12,6 @@ interface CreateRoomViewState {
 }
 
 class CreateRoomView extends React.Component<CreateRoomViewProps, CreateRoomViewState> {
-
-  // buttonText: string;
-  // canCreateParty: boolean;
 
   constructor(props: CreateRoomViewProps) {
     super(props);
@@ -40,11 +36,7 @@ class CreateRoomView extends React.Component<CreateRoomViewProps, CreateRoomView
   }
 
   createRoom = (sessionContext: ISessionContext): void => {
-    sessionContext.createSession(() => {
-      this.props.popupViewUpdater(sessionContext);
-
-      chrome.runtime.sendMessage(this.props.currentTab);
-    });
+    sessionContext.createSession(() => this.props.popupViewUpdater(this.props.currentTab));
   }
 
   render = (): React.ReactNode => {

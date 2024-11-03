@@ -1,8 +1,9 @@
 import React from "react"
-import IPartyAction from "../models/party-action-interface";
+import ISocketAction from "../models/party-action.interface";
+import IExtensionMessage from "../models/extension-message.interface";
 
 export interface ISessionContext {
-  sessionId: string;
+  sessionId: string | null;
   createSession: (callback?: () => void) => void;
   closeSession: (callback?: () => void) => void;
 }
@@ -12,63 +13,58 @@ interface SessionContextProps {
 }
 
 interface SessionContextState {
-  sessionId: string;
-  webSocket: WebSocket | null;
+  sessionId: string | null;
 }
 
-const SessionContext = React.createContext<ISessionContext>({sessionId: '', createSession: () => {}, closeSession: () => {}});
+const SessionContext = React.createContext<ISessionContext>({sessionId: null, createSession: () => {}, closeSession: () => {}});
 
 export class SessionContextProvider extends React.Component<SessionContextProps, SessionContextState> {
 
   constructor(props: SessionContextProps) {
     super(props);
+
+    chrome.runtime.onMessage.addListener((message: IExtensionMessage, sender: chrome.runtime.MessageSender) => {
+      if (message.messageType === 'SESSION_INFO') {
+        this.setState({
+          sessionId: message.data as string | null
+        });
+      }
+    });
+    
   }
 
-  sendSessionMessage = (message: IPartyAction): void => {
-    if (this.state.webSocket != null) {
-      this.state.webSocket.send(JSON.stringify(message));
-    }
+  sendSessionMessage = (message: ISocketAction): void => {
+    // if (this.state.webSocket != null) {
+    //   this.state.webSocket.send(JSON.stringify(message));
+    // }
   }
 
   createSession = (callback?: () => void): void => {
-    this.setState({ webSocket: new WebSocket('ws://localhost:8080/broadcast') },
-      () => {
-        if (this.state.webSocket != null) {
-          const webSocket: WebSocket = this.state.webSocket;
-          
-          webSocket.onopen = () => {
-            console.log("Socket connection established");
-          };
+    const response: Promise<IExtensionMessage> = chrome.runtime.sendMessage({
+      messageType: 'SESSION_INFO',
+      data: 'CREATE'
+    });
 
-          webSocket.onmessage = (messageEvent: MessageEvent) => {
-            console.log(messageEvent.data);
-            const message: IPartyAction = JSON.parse(messageEvent.data);
-            if (message.actionType === 'CREATE_SESSION') {
-              this.setState({
-                sessionId: message.data
-              }, () => {
-                (typeof callback === 'function' && callback())
-              });
-            }
-          };
-
-          webSocket.onerror = (event: Event) => {
-            console.log('Error encountered in the socket session');
-            console.error(event);
-          };
-        }
+    response.then((message: IExtensionMessage) => {
+      if (!!message) {
+        console.log(message);
+        this.setState({
+          sessionId: message.data as string | null
+        });
+      }
+      (typeof callback === 'function' && callback())
     });
   }
 
   closeSession = (callback?: () => void): void => {
-    if (this.state.webSocket != null) {
-      this.state.webSocket.close();
-    }
-    this.setState({
-      sessionId: '',
-      webSocket: null
+    chrome.runtime.sendMessage({
+      messageType: 'SESSION_INFO',
+      data: 'CLOSE'
     }, () => {
-      (typeof callback === 'function' && callback())
+      this.setState({
+        sessionId: null
+      });
+      (typeof callback === 'function' && callback());
     });
   }
 
@@ -87,3 +83,5 @@ export class SessionContextProvider extends React.Component<SessionContextProps,
 }
 
 export const SessionContextConsumer = SessionContext.Consumer;
+
+export default SessionContext;

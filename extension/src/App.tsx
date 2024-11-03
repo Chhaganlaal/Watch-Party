@@ -1,7 +1,6 @@
 import './App.css';
 import Helmet from 'react-helmet';
 import Popup from './popup/popup';
-import DefaultView from './views/default-view';
 import { SessionContextProvider } from './contexts/session-context';
 
 function App() {
